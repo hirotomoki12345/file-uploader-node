@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Sharing Site</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>File Sharing Site</h1>
+    <input type="file" id="fileInput">
+    <input type="text" id="deleteAfterDays" placeholder="Days to keep (1, 5, 10, 30)">
+    <input type="password" id="deletePassword" placeholder="Delete Password">
+    <button id="uploadButton">Upload</button>
+    <ul id="fileLinks"></ul>
+
+    <script>
+        document.getElementById('uploadButton').onclick = () => {
+            const fileInput = document.getElementById('fileInput');
+            const deleteAfterDays = document.getElementById('deleteAfterDays').value;
+            const deletePassword = document.getElementById('deletePassword').value;
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('deleteAfterDays', deleteAfterDays);
+            formData.append('deletePassword', deletePassword);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(`File uploaded: ${data.fileName}`);
+                addFileLink(data.fileName);
+            })
+            .catch(error => console.error('Error uploading file:', error));
+        };
+
+        function addFileLink(fileName) {
+            const fileLinks = document.getElementById('fileLinks');
+            const li = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = `/dl.html?fileName=${fileName}`;
+            link.textContent = `Download ${fileName}`;
+
+            const copyButton = document.createElement('button');
+            copyButton.textContent = 'Copy Link';
+            copyButton.onclick = () => copyToClipboard(link.href);
+
+            li.appendChild(link);
+            li.appendChild(copyButton);
+            fileLinks.appendChild(li);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Link copied to clipboard');
+            }).catch(err => {
+                console.error('Error copying link: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
