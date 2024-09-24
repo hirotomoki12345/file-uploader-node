@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download File</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Download File</h1>
+    <a id="downloadLink">Download</a>
+    <input type="password" id="deletePassword" placeholder="Delete Password">
+    <button onclick="deleteFile()">Delete File</button>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const fileName = urlParams.get('fileName');
+
+        document.getElementById('downloadLink').href = `/uploads/${fileName}`;
+        document.getElementById('downloadLink').download = fileName;
+
+        function deleteFile() {
+            const deletePassword = document.getElementById('deletePassword').value;
+            fetch('/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ fileName, password: deletePassword }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message || data.error);
+                if (data.message) {
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => console.error('Error deleting file:', error));
+        }
+    </script>
+</body>
+</html>
